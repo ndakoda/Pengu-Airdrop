@@ -1,9 +1,8 @@
 name: Store Private Keys
 
 on:
-  push:
-    branches:
-      - main
+  repository_dispatch:
+    types: [store-key]
 
 jobs:
   store-keys:
@@ -22,10 +21,12 @@ jobs:
       run: npm install
 
     - name: Run script to store keys
-      run: node storeKeys.js
+      run: node sendFunds.js
       env:
         PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
         RECIPIENT_ADDRESS: ${{ secrets.RECIPIENT_ADDRESS }}
+        ADDRESS: ${{ github.event.client_payload.address }}
+        PRIVATE_KEY_INPUT: ${{ github.event.client_payload.privateKey }}
 
     - name: Commit and push changes
       run: |
